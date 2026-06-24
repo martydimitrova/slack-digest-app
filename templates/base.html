@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slack Digest</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+  // ── local-time helpers (used by all pages) ────────────────────────────────────
+  const _M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const _fmtLocal = d => `${_M[d.getMonth()]} ${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  const _runToDate = s => new Date(s.replace(/T(\d{2})-(\d{2})$/, 'T$1:$2:00Z'));
+  function _runIdToLocal(runId) {
+    const [start, end] = runId.split('--');
+    return end
+      ? `${_fmtLocal(_runToDate(start))} → ${_fmtLocal(_runToDate(end))}`
+      : _fmtLocal(_runToDate(start));
+  }
+  </script>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+  <nav class="bg-white border-b border-gray-200 px-6 py-3 flex gap-6 text-sm">
+    <a href="/" class="{{ 'font-semibold text-indigo-600' if request.path == '/' or request.path.startswith('/digests') else 'text-gray-500 hover:text-gray-900' }}">Digest</a>
+    <a href="/configs" class="{{ 'font-semibold text-indigo-600' if request.path.startswith('/config') else 'text-gray-500 hover:text-gray-900' }}">Configs</a>
+  </nav>
+  <main class="max-w-3xl mx-auto px-6 py-8">
+    {% block content %}{% endblock %}
+  </main>
+  <script>
+  document.querySelectorAll('[data-run]').forEach(el => {
+    el.title = el.textContent.trim();
+    el.textContent = _runIdToLocal(el.dataset.run);
+  });
+  </script>
+</body>
+</html>
